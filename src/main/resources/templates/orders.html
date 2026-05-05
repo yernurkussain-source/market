@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Orders — MyMarket</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/ui/products" class="navbar-brand">MyMarket</a>
+    <div class="navbar-links">
+        <a th:href="@{/ui/products}">🛒 Products</a>
+        <a th:href="@{/ui/categories}">📂 Categories</a>
+        <a th:href="@{/ui/orders}" class="active">📦 Orders</a>
+        <a th:href="@{/ui/users}">👤 Users</a>
+    </div>
+</nav>
+
+<div class="page">
+    <div class="page-header">
+        <div class="page-title">Orders</div>
+        <div class="page-subtitle">Manage all orders</div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Orders</div>
+            <div class="stat-value" th:text="${#lists.size(orders)}">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">📋 Order List</span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <div class="empty-state-text">No orders found.</div>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(orders)}" class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"/>
+                    <td th:text="${order.user != null ? order.user.fullname : '—'}"/>
+                    <td>
+                            <span class="badge"
+                                  th:classappend="${order.status == 'CONFIRMED'} ? 'badge-success' : (${order.status == 'CANCELLED'} ? 'badge-danger' : 'badge-warning')"
+                                  th:text="${order.status}"/>
+                    </td>
+                    <td th:text="${order.createdAt}"/>
+                    <td>
+                            <span class="badge badge-success"
+                                  th:text="${#lists.size(order.items)} + ' items'"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
