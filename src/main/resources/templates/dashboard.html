@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard — MyMarket</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}" th:with="activePage='dashboard'"></div>
+
+<div class="page">
+    <div class="page-header">
+        <div class="page-title">Welcome, <span sec:authentication="name">User</span> </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card" onclick="location.href='/ui/products'" style="cursor:pointer">
+            <div class="stat-icon"></div>
+            <div class="stat-label">Products</div>
+            <div class="stat-value" th:text="${productCount}">0</div>
+        </div>
+        <div class="stat-card" onclick="location.href='/ui/categories'" style="cursor:pointer">
+
+            <div class="stat-label">Categories</div>
+            <div class="stat-value" th:text="${categoryCount}">0</div>
+        </div>
+        <div class="stat-card" onclick="location.href='/ui/orders'" style="cursor:pointer">
+            <div class="stat-label" th:text="${ordersTitle}">Orders</div>
+            <div class="stat-value" th:text="${orderCount}">0</div>
+        </div>
+        <div class="stat-card" onclick="location.href='/ui/users'" style="cursor:pointer" sec:authorize="hasRole('ADMIN')">
+
+            <div class="stat-label">Users</div>
+            <div class="stat-value" th:text="${userCount}">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Recent orders</span>
+            <a th:href="@{/ui/orders}" class="btn btn-primary btn-sm">View all</a>
+        </div>
+        <div th:if="${recentOrders.isEmpty()}" class="empty-state">
+            <div class="empty-state-text">No orders yet.</div>
+        </div>
+        <div th:if="${!recentOrders.isEmpty()}" class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${recentOrders}">
+                    <td th:text="'#' + ${order.id}"></td>
+                    <td th:text="${order.user != null ? order.user.fullname : '—'}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${order.status == 'CONFIRMED'} ? 'badge-success' : (${order.status == 'CANCELLED'} ? 'badge-danger' : 'badge-warning')"
+                              th:text="${order.status}"></span>
+                    </td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

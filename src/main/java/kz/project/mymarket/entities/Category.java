@@ -1,9 +1,13 @@
 package kz.project.mymarket.entities;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 
 @Entity
@@ -16,10 +20,10 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Категория атауы бос болмауы керек")
+    @NotBlank(message = "Category name is required")
     private String name;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category")
     private List<Product> products;
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,27 +8,21 @@
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
-
-<nav class="navbar">
-    <a href="/ui/products" class="navbar-brand">MyMarket</a>
-    <div class="navbar-links">
-        <a th:href="@{/ui/products}" class="active">🛒 Products</a>
-        <a th:href="@{/ui/categories}">📂 Categories</a>
-        <a th:href="@{/ui/orders}">📦 Orders</a>
-        <a th:href="@{/ui/users}">👤 Users</a>
-    </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar}" th:with="activePage='products'"></div>
 
 <div class="page">
-    <div class="page-header">
-        <div class="page-title">Products</div>
-        <div class="page-subtitle">Manage all products</div>
+    <div class="page-header page-header-row">
+        <div>
+            <div class="page-title"> Products</div>
+        </div>
     </div>
 
-    <!-- Stats -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Products</div>
+            <div class="stat-label">Total products</div>
             <div class="stat-value" th:text="${#lists.size(products)}">0</div>
         </div>
         <div class="stat-card">
@@ -36,57 +31,43 @@
         </div>
     </div>
 
-    <!-- Add form -->
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">➕ Add New Product</span>
-        </div>
+    <div sec:authorize="hasRole('ADMIN')" class="card">
+        <div class="card-header"><span class="card-title">➕ Add new product</span></div>
         <div class="card-body">
             <form th:action="@{/ui/products/add}" method="post">
                 <div class="form-grid">
                     <div class="form-group">
                         <label class="form-label">Name</label>
-                        <input class="form-control" type="text" name="name"
-                               placeholder="e.g. iPhone 15" required/>
+                        <input class="form-control" type="text" name="name" placeholder="e.g. iPhone 15" required/>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Price (₸)</label>
-                        <input class="form-control" type="number" name="price"
-                               placeholder="e.g. 450000" step="0.01" min="0" required/>
+                        <input class="form-control" type="number" name="price" placeholder="e.g. 450000" step="0.01" min="1" required/>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
-                        <input class="form-control" type="number" name="quantity"
-                               placeholder="e.g. 10" min="0" required/>
+                        <input class="form-control" type="number" name="quantity" placeholder="e.g. 10" min="0" required/>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Category</label>
                         <select class="form-control" name="categoryId" required>
-                            <option value="">— Select —</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.id}"
-                                    th:text="${cat.name}"/>
+                            <option value="">— Select category —</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
-                            ➕ Add
-                        </button>
+                        <button type="submit" class="btn btn-primary">Add product</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Table -->
     <div class="card">
-        <div class="card-header">
-            <span class="card-title">📋 Product List</span>
-        </div>
+        <div class="card-header"><span class="card-title">Product list</span></div>
 
         <div th:if="${#lists.isEmpty(products)}" class="empty-state">
-            <div class="empty-state-icon">📭</div>
-            <div class="empty-state-text">No products found. Add one above!</div>
+            <div class="empty-state-text">No products yet.</div>
         </div>
 
         <div th:if="${!#lists.isEmpty(products)}" class="table-wrapper">
@@ -98,29 +79,29 @@
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Category</th>
-                    <th>Action</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="product : ${products}">
-                    <td th:text="${product.id}"/>
-                    <td th:text="${product.name}"/>
+                    <td th:text="${product.id}"></td>
+                    <td class="strong" th:text="${product.name}"></td>
+                    <td><span class="price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' $'"></span></td>
                     <td>
-                            <span class="price"
-                                  th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' ₸'"/>
+                        <span class="badge"
+                              th:classappend="${product.quantity != null and product.quantity > 5} ? 'badge-success' : (${product.quantity != null and product.quantity > 0} ? 'badge-warning' : 'badge-danger')"
+                              th:text="${product.quantity} + ' pcs'"></span>
                     </td>
+                    <td th:text="${product.categoryName != null ? product.categoryName : '—'}"></td>
                     <td>
-                            <span class="badge"
-                                  th:classappend="${product.quantity > 5} ? 'badge-success' : (${product.quantity > 0} ? 'badge-warning' : 'badge-danger')"
-                                  th:text="${product.quantity} + ' pcs'"/>
-                    </td>
-                    <td th:text="${product.category != null ? product.category.name : '—'}"/>
-                    <td>
-                        <a th:href="@{/ui/products/delete/{id}(id=${product.id})}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure you want to delete this?')">
-                            🗑 Delete
-                        </a>
+                        <div class="action-row">
+                            <form sec:authorize="hasRole('USER')" th:action="@{/ui/products/buy/{id}(id=${product.id})}" method="post" class="inline-buy-form">
+                                <input class="form-control quantity-input" type="number" name="quantity" min="1" th:max="${product.quantity}" value="1" required/>
+                                <button type="submit" class="btn btn-primary btn-sm" th:disabled="${product.quantity == 0}">Buy</button>
+                            </form>
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/ui/products/edit/{id}(id=${product.id})}" class="btn btn-secondary btn-sm">Edit</a>
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/ui/products/delete/{id}(id=${product.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -128,6 +109,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

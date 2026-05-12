@@ -1,8 +1,13 @@
 package kz.project.mymarket.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
@@ -14,14 +19,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Email бос болмауы керек")
-    @Email(message = "Email форматы дұрыс емес")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "Пароль бос болмауы керек")
-    @Size(min = 4, message = "Пароль кемінде 4 символ болуы керек")
+    @NotBlank(message = "Password is required")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "Аты-жөні бос болмауы керек")
+    @NotBlank(message = "Full name is required")
     private String fullname;
+
+    private String role; // "USER" or "ADMIN"
 }

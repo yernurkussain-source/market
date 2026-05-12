@@ -5,6 +5,7 @@ import kz.project.mymarket.entities.Category;
 import kz.project.mymarket.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -27,6 +28,11 @@ public class CategoryController {
     @PostMapping
     public Category create(@Valid @RequestBody Category category) {
         return categoryService.save(category);
+    }
+
+    @PutMapping("/{id}")
+    public Category update(@PathVariable Long id, @Valid @RequestBody Category category) {
+        return categoryService.update(id, category);
     }
 
     @DeleteMapping("/{id}")

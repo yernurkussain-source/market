@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="navbar" class="navbar">
+  <a href="/ui/dashboard" class="navbar-brand">MyMarket</a>
+  <div class="navbar-links">
+    <a th:href="@{/ui/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active' : ''"> Dashboard</a>
+    <a th:href="@{/ui/products}" th:classappend="${activePage == 'products'} ? 'active' : ''"> Products</a>
+    <a th:href="@{/ui/categories}" th:classappend="${activePage == 'categories'} ? 'active' : ''"> Categories</a>
+    <a th:href="@{/ui/orders}" th:classappend="${activePage == 'orders'} ? 'active' : ''"> Orders</a>
+    <a th:href="@{/ui/users}" th:classappend="${activePage == 'users'} ? 'active' : ''" sec:authorize="hasRole('ADMIN')"> Users</a>
+  </div>
+  <div class="navbar-user">
+    <span class="user-badge">
+      <span sec:authorize="hasRole('ADMIN')">👑</span>
+      <span sec:authorize="hasRole('USER')">👤</span>
+      <span sec:authentication="name">User</span>
+    </span>
+    <a th:href="@{/ui/logout}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+</body>
+</html>

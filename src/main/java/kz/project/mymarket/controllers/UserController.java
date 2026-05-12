@@ -5,6 +5,7 @@ import kz.project.mymarket.entities.User;
 import kz.project.mymarket.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -22,6 +23,11 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) { return userService.save(user); }
+
+    @PutMapping("/{id}")
+    public User update(@PathVariable Long id, @Valid @RequestBody User user) {
+        return userService.update(id, user);
+    }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) { userService.delete(id); }

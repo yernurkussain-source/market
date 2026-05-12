@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,44 +8,34 @@
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
-
-<nav class="navbar">
-    <a href="/ui/products" class="navbar-brand">MyMarket</a>
-    <div class="navbar-links">
-        <a th:href="@{/ui/products}">🛒 Products</a>
-        <a th:href="@{/ui/categories}" class="active">📂 Categories</a>
-        <a th:href="@{/ui/orders}">📦 Orders</a>
-        <a th:href="@{/ui/users}">👤 Users</a>
-    </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar}" th:with="activePage='categories'"></div>
 
 <div class="page">
     <div class="page-header">
-        <div class="page-title">Categories</div>
-        <div class="page-subtitle">Manage product categories</div>
+        <div class="page-title"> Categories</div>
     </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Categories</div>
+            <div class="stat-label">Total categories</div>
             <div class="stat-value" th:text="${#lists.size(categories)}">0</div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title">➕ New Category</span>
-        </div>
+    <div sec:authorize="hasRole('ADMIN')" class="card">
+        <div class="card-header"><span class="card-title">➕ Add new category</span></div>
         <div class="card-body">
             <form th:action="@{/ui/categories/add}" method="post">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label">Category Name</label>
-                        <input class="form-control" type="text" name="name"
-                               placeholder="e.g. Electronics" required/>
+                        <label class="form-label">Category name</label>
+                        <input class="form-control" type="text" name="name" placeholder="e.g. Electronics" required/>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">➕ Add</button>
+                        <button type="submit" class="btn btn-primary">Add category</button>
                     </div>
                 </div>
             </form>
@@ -52,13 +43,10 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <span class="card-title">📋 Category List</span>
-        </div>
+        <div class="card-header"><span class="card-title">Category list</span></div>
 
         <div th:if="${#lists.isEmpty(categories)}" class="empty-state">
-            <div class="empty-state-icon">📂</div>
-            <div class="empty-state-text">No categories found. Add one above!</div>
+            <div class="empty-state-text">No categories yet.</div>
         </div>
 
         <div th:if="${!#lists.isEmpty(categories)}" class="table-wrapper">
@@ -67,24 +55,20 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Product Count</th>
-                    <th>Action</th>
+                    <th>Products</th>
+                    <th sec:authorize="hasRole('ADMIN')">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="cat : ${categories}">
-                    <td th:text="${cat.id}"/>
-                    <td th:text="${cat.name}"/>
-                    <td>
-                            <span class="badge badge-success"
-                                  th:text="${#lists.size(cat.products)} + ' products'"/>
-                    </td>
-                    <td>
-                        <a th:href="@{/ui/categories/delete/{id}(id=${cat.id})}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Are you sure you want to delete this?')">
-                            🗑 Delete
-                        </a>
+                    <td th:text="${cat.id}"></td>
+                    <td class="strong" th:text="${cat.name}"></td>
+                    <td><span class="badge badge-success" th:text="${cat.products != null ? cat.products.size() : 0} + ' products'"></span></td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <div class="action-row">
+                            <a th:href="@{/ui/categories/edit/{id}(id=${cat.id})}" class="btn btn-secondary btn-sm">Edit</a>
+                            <a th:href="@{/ui/categories/delete/{id}(id=${cat.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this category?')">Delete</a>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -92,6 +76,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

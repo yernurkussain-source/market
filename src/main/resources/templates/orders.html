@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,38 +8,28 @@
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
-
-<nav class="navbar">
-    <a href="/ui/products" class="navbar-brand">MyMarket</a>
-    <div class="navbar-links">
-        <a th:href="@{/ui/products}">🛒 Products</a>
-        <a th:href="@{/ui/categories}">📂 Categories</a>
-        <a th:href="@{/ui/orders}" class="active">📦 Orders</a>
-        <a th:href="@{/ui/users}">👤 Users</a>
-    </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar}" th:with="activePage='orders'"></div>
 
 <div class="page">
     <div class="page-header">
-        <div class="page-title">Orders</div>
-        <div class="page-subtitle">Manage all orders</div>
+        <div class="page-title"> Orders</div>
     </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">Total Orders</div>
+            <div class="stat-label">Total orders</div>
             <div class="stat-value" th:text="${#lists.size(orders)}">0</div>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <span class="card-title">📋 Order List</span>
-        </div>
+        <div class="card-header"><span class="card-title">Order list</span></div>
 
         <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
-            <div class="empty-state-icon">📦</div>
-            <div class="empty-state-text">No orders found.</div>
+            <div class="empty-state-text">No orders yet.</div>
         </div>
 
         <div th:if="${!#lists.isEmpty(orders)}" class="table-wrapper">
@@ -50,21 +41,36 @@
                     <th>Status</th>
                     <th>Date</th>
                     <th>Items</th>
+                    <th sec:authorize="hasRole('ADMIN')">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="order : ${orders}">
-                    <td th:text="${order.id}"/>
-                    <td th:text="${order.user != null ? order.user.fullname : '—'}"/>
+                    <td th:text="'#' + ${order.id}"></td>
+                    <td th:text="${order.user != null ? order.user.fullname : '—'}"></td>
                     <td>
-                            <span class="badge"
-                                  th:classappend="${order.status == 'CONFIRMED'} ? 'badge-success' : (${order.status == 'CANCELLED'} ? 'badge-danger' : 'badge-warning')"
-                                  th:text="${order.status}"/>
+                        <span class="badge"
+                              th:classappend="${order.status == 'CONFIRMED'} ? 'badge-success' : (${order.status == 'CANCELLED'} ? 'badge-danger' : 'badge-warning')"
+                              th:text="${order.status}"></span>
                     </td>
-                    <td th:text="${order.createdAt}"/>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy HH:mm')}"></td>
                     <td>
-                            <span class="badge badge-success"
-                                  th:text="${#lists.size(order.items)} + ' items'"/>
+                        <div th:each="item : ${order.items}">
+                            <span th:text="${item.product != null ? item.product.name : 'Product'} + ' × ' + ${item.quantity}"></span>
+                        </div>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <div class="action-row">
+                            <form th:action="@{/ui/orders/status/{id}(id=${order.id})}" method="post" class="inline-status-form">
+                                <select class="form-control status-select" name="status">
+                                    <option value="PENDING" th:selected="${order.status == 'PENDING'}">PENDING</option>
+                                    <option value="CONFIRMED" th:selected="${order.status == 'CONFIRMED'}">CONFIRMED</option>
+                                    <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">CANCELLED</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </form>
+                            <a th:href="@{/ui/orders/delete/{id}(id=${order.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this order?')">Delete</a>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -72,6 +78,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

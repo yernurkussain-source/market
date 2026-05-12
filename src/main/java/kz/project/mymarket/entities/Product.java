@@ -1,9 +1,15 @@
 package kz.project.mymarket.entities;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "products")
@@ -15,15 +21,15 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Өнім атауы бос болмауы керек")
+    @NotBlank(message = "Product name is required")
     private String name;
 
-    @NotNull(message = "Баға бос болмауы керек")
-    @Positive(message = "Баға оң сан болуы керек")
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be positive")
     private Double price;
 
-    @NotNull(message = "Саны бос болмауы керек")
-    @Min(value = 0, message = "Саны 0-ден кіші болмауы керек")
+    @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity cannot be negative")
     private Integer quantity;
 
     @JsonBackReference

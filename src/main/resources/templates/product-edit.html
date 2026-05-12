@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Edit Product — MyMarket</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}" th:with="activePage='products'"></div>
+
+<div class="page narrow-page">
+    <div class="page-header page-header-row">
+        <div>
+            <div class="page-title">Edit Product</div>
+            <div class="page-subtitle">Update product information in a separate clean form.</div>
+        </div>
+        <a th:href="@{/ui/products}" class="btn btn-secondary">Back to products</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="card edit-card">
+        <div class="card-header">
+            <span class="card-title">Product #<span th:text="${product.id}"></span></span>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/ui/products/update/{id}(id=${product.id})}" method="post">
+                <div class="form-group stacked-field">
+                    <label class="form-label">Name</label>
+                    <input class="form-control" type="text" name="name" th:value="${product.name}" required/>
+                </div>
+                <div class="form-grid two-columns">
+                    <div class="form-group">
+                        <label class="form-label">Price (₸)</label>
+                        <input class="form-control" type="number" name="price" th:value="${product.price}" step="0.01" min="1" required/>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input class="form-control" type="number" name="quantity" th:value="${product.quantity}" min="0" required/>
+                    </div>
+                </div>
+                <div class="form-group stacked-field">
+                    <label class="form-label">Category</label>
+                    <select class="form-control" name="categoryId" required>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:selected="${cat.id == product.categoryId}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <a th:href="@{/ui/products}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
